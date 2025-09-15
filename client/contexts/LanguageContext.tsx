@@ -1,7 +1,18 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 export type LanguageCode =
-  | "en" | "es" | "fr" | "de" | "it" | "pt" | "zh" | "ja" | "ko" | "hi" | "ar" | "ru";
+  | "en"
+  | "es"
+  | "fr"
+  | "de"
+  | "it"
+  | "pt"
+  | "zh"
+  | "ja"
+  | "ko"
+  | "hi"
+  | "ar"
+  | "ru";
 
 interface LanguageContextType {
   language: LanguageCode;
@@ -12,21 +23,31 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export function useLanguage() {
   const ctx = useContext(LanguageContext);
-  if (!ctx) throw new Error("useLanguage must be used within LanguageProvider");
+  if (!ctx) {
+    throw new Error("useLanguage must be used within a LanguageProvider");
+  }
   return ctx;
 }
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<LanguageCode>(() => {
-    const saved = localStorage.getItem("skytrack_language") as LanguageCode | null;
-    return saved ?? "en";
-  });
+  const [language, setLanguageState] = useState<LanguageCode>("en");
 
+  // Load saved language (only on client)
+  useEffect(() => {
+    const saved = localStorage.getItem("skytrack_language") as LanguageCode | null;
+    if (saved) {
+      setLanguageState(saved);
+    }
+  }, []);
+
+  // Save language when it changes
   useEffect(() => {
     localStorage.setItem("skytrack_language", language);
   }, [language]);
 
-  const setLanguage = (lang: LanguageCode) => setLanguageState(lang);
+  const setLanguage = (lang: LanguageCode) => {
+    setLanguageState(lang);
+  };
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage }}>

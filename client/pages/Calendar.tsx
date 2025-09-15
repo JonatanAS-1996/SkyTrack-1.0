@@ -47,9 +47,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
-  MapPin,
-  Users,
-  BookOpen,
 } from "lucide-react";
 import {
   format,
@@ -64,7 +61,7 @@ import {
   startOfWeek,
   endOfWeek,
 } from "date-fns";
-import { es } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import { Event } from "../contexts/DataContext";
 
 export default function Calendar() {
@@ -84,25 +81,19 @@ export default function Calendar() {
   // Calculate calendar grid
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
-  const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 }); // Start on Monday
+  const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 });
   const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
   const calendarDays = eachDayOfInterval({
     start: calendarStart,
     end: calendarEnd,
   });
 
-  // Get events for a specific day
   const getEventsForDay = (day: Date) => {
     return events.filter((event) => isSameDay(new Date(event.date), day));
   };
 
-  const handlePreviousMonth = () => {
-    setCurrentDate(subMonths(currentDate, 1));
-  };
-
-  const handleNextMonth = () => {
-    setCurrentDate(addMonths(currentDate, 1));
-  };
+  const handlePreviousMonth = () => setCurrentDate(subMonths(currentDate, 1));
+  const handleNextMonth = () => setCurrentDate(addMonths(currentDate, 1));
 
   const handleDayClick = (day: Date) => {
     setSelectedDate(day);
@@ -118,9 +109,7 @@ export default function Calendar() {
     e.preventDefault();
     if (!formData.title.trim() || !formData.date) return;
 
-    const eventDate = new Date(
-      `${formData.date}T${formData.time || "00:00"}:00`,
-    );
+    const eventDate = new Date(`${formData.date}T${formData.time || "00:00"}:00`);
 
     if (editingEvent) {
       updateEvent(editingEvent, {
@@ -156,9 +145,7 @@ export default function Calendar() {
     setShowAddDialog(true);
   };
 
-  const handleDelete = (eventId: string) => {
-    removeEvent(eventId);
-  };
+  const handleDelete = (eventId: string) => removeEvent(eventId);
 
   const resetForm = () => {
     setFormData({
@@ -172,9 +159,8 @@ export default function Calendar() {
     setSelectedDate(null);
   };
 
-  const weekDays = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+  const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-  // Get upcoming events
   const upcomingEvents = events
     .filter((event) => new Date(event.date) >= new Date())
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
@@ -185,10 +171,10 @@ export default function Calendar() {
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-            Calendario
+            Calendar
           </h1>
           <p className="text-muted-foreground">
-            Gestiona tu horario y eventos académicos.
+            Manage your schedule and academic events.
           </p>
         </div>
         <Dialog
@@ -201,27 +187,25 @@ export default function Calendar() {
           <DialogTrigger asChild>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              Agregar Evento
+              Add Event
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[500px]">
             <form onSubmit={handleSubmit}>
               <DialogHeader>
-                <DialogTitle>
-                  {editingEvent ? "Editar Evento" : "Nuevo Evento"}
-                </DialogTitle>
+                <DialogTitle>{editingEvent ? "Edit Event" : "New Event"}</DialogTitle>
                 <DialogDescription>
                   {editingEvent
-                    ? "Actualiza los detalles del evento."
-                    : "Crea un nuevo evento en tu calendario."}
+                    ? "Update the event details."
+                    : "Create a new event in your calendar."}
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Título del Evento</Label>
+                  <Label htmlFor="title">Event Title</Label>
                   <Input
                     id="title"
-                    placeholder="ej. Examen de Matemáticas"
+                    placeholder="e.g. Math Exam"
                     value={formData.title}
                     onChange={(e) =>
                       setFormData({ ...formData, title: e.target.value })
@@ -230,10 +214,10 @@ export default function Calendar() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="description">Descripción</Label>
+                  <Label htmlFor="description">Description</Label>
                   <Textarea
                     id="description"
-                    placeholder="Descripción opcional del evento"
+                    placeholder="Optional event description"
                     value={formData.description}
                     onChange={(e) =>
                       setFormData({ ...formData, description: e.target.value })
@@ -243,7 +227,7 @@ export default function Calendar() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="date">Fecha</Label>
+                    <Label htmlFor="date">Date</Label>
                     <Input
                       id="date"
                       type="date"
@@ -255,7 +239,7 @@ export default function Calendar() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="time">Hora</Label>
+                    <Label htmlFor="time">Time</Label>
                     <Input
                       id="time"
                       type="time"
@@ -267,7 +251,7 @@ export default function Calendar() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="class">Clase (Opcional)</Label>
+                  <Label htmlFor="class">Class (Optional)</Label>
                   <Select
                     value={formData.classID}
                     onValueChange={(value) =>
@@ -275,10 +259,10 @@ export default function Calendar() {
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar clase" />
+                      <SelectValue placeholder="Select class" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">Sin clase asociada</SelectItem>
+                      <SelectItem value="none">No associated class</SelectItem>
                       {classes.map((classItem) => (
                         <SelectItem key={classItem.id} value={classItem.id}>
                           <div className="flex items-center gap-2">
@@ -300,11 +284,9 @@ export default function Calendar() {
                   variant="outline"
                   onClick={() => setShowAddDialog(false)}
                 >
-                  Cancelar
+                  Cancel
                 </Button>
-                <Button type="submit">
-                  {editingEvent ? "Actualizar Evento" : "Crear Evento"}
-                </Button>
+                <Button type="submit">{editingEvent ? "Update Event" : "Create Event"}</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -312,33 +294,20 @@ export default function Calendar() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Calendar */}
         <div className="lg:col-span-2">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
               <div>
                 <CardTitle className="text-2xl">
-                  {format(currentDate, "MMMM yyyy", { locale: es })}
+                  {format(currentDate, "MMMM yyyy", { locale: enUS })}
                 </CardTitle>
-                <CardDescription>
-                  Haz clic en un día para agregar un evento
-                </CardDescription>
+                <CardDescription>Click a day to add an event</CardDescription>
               </div>
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="rounded-full"
-                  onClick={handlePreviousMonth}
-                >
+                <Button variant="outline" size="icon" className="rounded-full" onClick={handlePreviousMonth}>
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="rounded-full"
-                  onClick={handleNextMonth}
-                >
+                <Button variant="outline" size="icon" className="rounded-full" onClick={handleNextMonth}>
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
@@ -346,10 +315,7 @@ export default function Calendar() {
             <CardContent>
               <div className="grid grid-cols-7 gap-1 mb-4">
                 {weekDays.map((day) => (
-                  <div
-                    key={day}
-                    className="p-2 text-center text-sm font-medium text-muted-foreground"
-                  >
+                  <div key={day} className="p-2 text-center text-sm font-medium text-muted-foreground">
                     {day}
                   </div>
                 ))}
@@ -368,9 +334,7 @@ export default function Calendar() {
                       onDrop={(e) => {
                         e.preventDefault();
                         const eventId = e.dataTransfer.getData("text/plain");
-                        if (eventId) {
-                          updateEvent(eventId, { date: day });
-                        }
+                        if (eventId) updateEvent(eventId, { date: day });
                       }}
                       className={`
                         aspect-square p-2 rounded-xl cursor-pointer transition-all border border-border/50 bg-gradient-to-br from-card/70 to-card/40 backdrop-blur hover:shadow-sm
@@ -379,28 +343,20 @@ export default function Calendar() {
                       `}
                     >
                       <div className="flex items-start justify-between mb-1">
-                        <span
-                          className={`text-sm font-medium ${isCurrentDay ? "text-primary" : ""}`}
-                        >
+                        <span className={`text-sm font-medium ${isCurrentDay ? "text-primary" : ""}`}>
                           {format(day, "d")}
                         </span>
                       </div>
                       <div className="space-y-1">
                         {dayEvents.slice(0, 2).map((event) => {
-                          const classItem = classes.find(
-                            (c) => c.id === event.classID,
-                          );
+                          const classItem = classes.find((c) => c.id === event.classID);
                           return (
                             <div
                               key={event.id}
                               draggable
-                              onDragStart={(e) => {
-                                e.dataTransfer.setData("text/plain", event.id);
-                              }}
+                              onDragStart={(e) => e.dataTransfer.setData("text/plain", event.id)}
                               className="text-[11px] px-2 py-1 rounded-full text-white truncate"
-                              style={{
-                                backgroundColor: classItem?.color || "#6366f1",
-                              }}
+                              style={{ backgroundColor: classItem?.color || "#6366f1" }}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleEdit(event);
@@ -411,9 +367,7 @@ export default function Calendar() {
                           );
                         })}
                         {dayEvents.length > 2 && (
-                          <div className="text-[11px] text-muted-foreground">
-                            +{dayEvents.length - 2} más
-                          </div>
+                          <div className="text-[11px] text-muted-foreground">+{dayEvents.length - 2} more</div>
                         )}
                       </div>
                     </div>
@@ -424,33 +378,27 @@ export default function Calendar() {
           </Card>
         </div>
 
-        {/* Upcoming Events */}
         <div className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Clock className="h-5 w-5" />
-                Próximos Eventos
+                Upcoming Events
               </CardTitle>
               <CardDescription>
                 {upcomingEvents.length === 0
-                  ? "No hay eventos próximos"
-                  : `${upcomingEvents.length} eventos próximos`}
+                  ? "No upcoming events"
+                  : `${upcomingEvents.length} upcoming events`}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {upcomingEvents.length === 0 ? (
                 <div className="text-center py-6 text-muted-foreground">
                   <CalendarIcon className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                  <p>No hay eventos próximos</p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="mt-3"
-                    onClick={() => setShowAddDialog(true)}
-                  >
+                  <p>No upcoming events</p>
+                  <Button variant="outline" size="sm" className="mt-3" onClick={() => setShowAddDialog(true)}>
                     <Plus className="mr-2 h-4 w-4" />
-                    Agregar evento
+                    Add Event
                   </Button>
                 </div>
               ) : (
@@ -459,38 +407,26 @@ export default function Calendar() {
                   const eventDate = new Date(event.date);
 
                   return (
-                    <div
-                      key={event.id}
-                      className="flex items-start gap-3 p-3 rounded-lg border"
-                    >
+                    <div key={event.id} className="flex items-start gap-3 p-3 rounded-lg border">
                       <div className="flex-1 min-w-0">
                         <p className="font-medium truncate">{event.title}</p>
                         {event.description && (
-                          <p className="text-sm text-muted-foreground truncate">
-                            {event.description}
-                          </p>
+                          <p className="text-sm text-muted-foreground truncate">{event.description}</p>
                         )}
                         <div className="flex items-center gap-2 mt-2">
                           {classItem && (
                             <Badge variant="secondary" className="text-xs">
-                              <div
-                                className="h-2 w-2 rounded-full mr-1"
-                                style={{ backgroundColor: classItem.color }}
-                              />
+                              <div className="h-2 w-2 rounded-full mr-1" style={{ backgroundColor: classItem.color }} />
                               {classItem.name}
                             </Badge>
                           )}
                           <span className="text-xs text-muted-foreground">
-                            {format(eventDate, "MMM d, HH:mm", { locale: es })}
+                            {format(eventDate, "MMM d, HH:mm", { locale: enUS })}
                           </span>
                         </div>
                       </div>
                       <div className="flex gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEdit(event)}
-                        >
+                        <Button variant="ghost" size="sm" onClick={() => handleEdit(event)}>
                           <Edit className="h-4 w-4" />
                         </Button>
                         <AlertDialog>
@@ -501,22 +437,14 @@ export default function Calendar() {
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>
-                                Eliminar Evento
-                              </AlertDialogTitle>
+                              <AlertDialogTitle>Delete Event</AlertDialogTitle>
                               <AlertDialogDescription>
-                                ¿Estás seguro de que quieres eliminar "
-                                {event.title}"? Esta acción no se puede
-                                deshacer.
+                                Are you sure you want to delete "{event.title}"? This action cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDelete(event.id)}
-                              >
-                                Eliminar
-                              </AlertDialogAction>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDelete(event.id)}>Delete</AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
                         </AlertDialog>

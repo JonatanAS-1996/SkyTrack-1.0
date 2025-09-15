@@ -34,17 +34,17 @@ export default function ClassDetail() {
         <div className="flex items-center gap-4">
           <Button variant="outline" size="sm" onClick={() => navigate('/dashboard/classes')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Volver a Clases
+            Back to Classes
           </Button>
         </div>
         <div className="text-center py-12">
           <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-          <h3 className="text-lg font-medium mb-2">Clase no encontrada</h3>
+          <h3 className="text-lg font-medium mb-2">Class not found</h3>
           <p className="text-muted-foreground mb-4">
-            La clase que buscas no existe o ha sido eliminada.
+            The class you are looking for does not exist or has been deleted.
           </p>
           <Button asChild>
-            <Link to="/dashboard/classes">Volver a Clases</Link>
+            <Link to="/dashboard/classes">Back to Classes</Link>
           </Button>
         </div>
       </div>

@@ -12,7 +12,8 @@ import {
   CardTitle,
 } from "../components/ui/card";
 import { Alert, AlertDescription } from "../components/ui/alert";
-import { Loader2, Mail, Lock, BookOpen } from "lucide-react";
+import { Loader2, Mail, Lock } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -28,8 +29,9 @@ export default function Login() {
     try {
       await login(email, password);
       navigate("/dashboard");
-    } catch (err) {
-      setError("Invalid email or password");
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "Invalid email or password");
     }
   };
 
@@ -39,128 +41,139 @@ export default function Login() {
     try {
       await loginWithGoogle();
       navigate("/dashboard");
-    } catch (err) {
-      setError("Google login failed");
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "Google login failed");
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-blue-50/50 to-purple-50/50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <div className="mx-auto h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-            <BookOpen className="h-8 w-8 text-primary" />
-          </div>
-          <h1 className="text-3xl font-bold text-foreground">
-            Welcome to SkyTrack
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Sign in to your account to continue
-          </p>
-        </div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-zinc-50 via-slate-100 to-zinc-200 dark:from-zinc-900 dark:via-zinc-950 dark:to-black p-6">
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: "easeOut" }}
+        className="w-full max-w-md"
+      >
+        {/* Logo */}
+        <motion.div
+          className="mx-auto h-20 w-20 rounded-3xl bg-white/40 dark:bg-white/10 backdrop-blur-2xl flex items-center justify-center shadow-[0_8px_32px_rgba(0,0,0,0.2)] mb-8 overflow-hidden border border-white/40"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.2, type: "spring", stiffness: 120, damping: 12 }}
+        >
+          <img src="/favicon.ico" alt="App Logo" className="h-12 w-12 object-contain" />
+        </motion.div>
 
-        <Card className="border-0 shadow-xl">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center">Sign in</CardTitle>
-            <CardDescription className="text-center">
-              Enter your email and password to access your account
+        <Card className="border border-white/30 shadow-[0_8px_40px_rgba(0,0,0,0.15)] backdrop-blur-xl bg-white/60 dark:bg-zinc-900/70 rounded-3xl overflow-hidden">
+          <CardHeader className="space-y-2 text-center pb-6">
+            <CardTitle className="text-3xl font-semibold tracking-tight">
+              Welcome Back
+            </CardTitle>
+            <CardDescription className="text-muted-foreground text-sm">
+              Sign in to continue with SkyTrack ✨
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
             {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
+              <motion.div
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+              >
+                <Alert variant="destructive" className="rounded-xl">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              </motion.div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Email */}
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Mail className="absolute left-3 top-3 h-5 w-5 text-zinc-400" />
                   <Input
                     id="email"
                     type="email"
-                    placeholder="Enter your email"
+                    placeholder="you@domain.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10"
+                    className="pl-11 rounded-2xl bg-white/60 dark:bg-zinc-800/50 backdrop-blur-md border border-zinc-200/50 dark:border-zinc-700/40"
                     required
                   />
                 </div>
               </div>
 
+              {/* Password */}
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Lock className="absolute left-3 top-3 h-5 w-5 text-zinc-400" />
                   <Input
                     id="password"
                     type="password"
-                    placeholder="Enter your password"
+                    placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10"
+                    className="pl-11 rounded-2xl bg-white/60 dark:bg-zinc-800/50 backdrop-blur-md border border-zinc-200/50 dark:border-zinc-700/40"
                     required
                   />
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Sign in
+              {/* Sign In Button */}
+              <Button
+                type="submit"
+                className="w-full rounded-full py-5 text-base font-medium shadow-md transition-all hover:shadow-lg hover:scale-[1.02] bg-gradient-to-r from-sky-500 to-indigo-500 text-white"
+                disabled={loading}
+              >
+                {loading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+                Sign In
               </Button>
             </form>
 
-            <div className="relative">
+            {/* Divider */}
+            <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
+                <span className="w-full border-t border-muted" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">
+                <span className="bg-white/80 dark:bg-zinc-900/80 px-2 text-muted-foreground">
                   Or continue with
                 </span>
               </div>
             </div>
 
+            {/* Google Login */}
             <Button
               variant="outline"
-              className="w-full"
+              className="w-full rounded-full flex items-center justify-center gap-2 transition-all hover:shadow-lg"
               onClick={handleGoogleLogin}
               disabled={loading}
             >
-              <svg
-                className="mr-2 h-4 w-4"
-                aria-hidden="true"
-                focusable="false"
-                data-prefix="fab"
-                data-icon="google"
-                role="img"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 488 512"
-              >
-                <path
-                  fill="currentColor"
-                  d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h240z"
-                ></path>
-              </svg>
+              <img
+                src="https://www.svgrepo.com/show/355037/google.svg"
+                alt="Google"
+                className="h-4 w-4"
+              />
               Continue with Google
             </Button>
 
+            {/* Footer */}
             <div className="text-center text-sm">
-              <span className="text-muted-foreground">
-                Don't have an account?{" "}
+              <span className="text-zinc-500 dark:text-zinc-400">
+                Don’t have an account?{" "}
               </span>
               <Link
                 to="/register"
-                className="text-primary hover:text-primary/80 font-medium"
+                className="text-sky-600 dark:text-sky-400 hover:underline font-medium"
               >
-                Sign up
+                Create one
               </Link>
             </div>
           </CardContent>
         </Card>
-      </div>
+      </motion.div>
     </div>
   );
 }

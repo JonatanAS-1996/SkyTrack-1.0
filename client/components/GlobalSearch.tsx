@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useData } from "../contexts/DataContext";
 import { Input } from "./ui/input";
 import { Card } from "./ui/card";
+import { motion, AnimatePresence } from "framer-motion";
 import { Search, BookOpen, CheckSquare, FileText, Users } from "lucide-react";
 import { cn } from "../lib/utils";
 
@@ -32,72 +33,90 @@ export default function GlobalSearch() {
     else if (type === "contact") navigate(`/dashboard/contacts`);
   };
 
+  const sectionVariants = {
+    hidden: { opacity: 0, y: -5 },
+    visible: { opacity: 1, y: 0 },
+  };
+
   return (
-    <div className="relative w-full max-w-md">
-      <div className={cn("flex items-center gap-2 rounded-full bg-background/60 px-3 py-1.5 text-sm text-muted-foreground shadow-sm backdrop-blur") }>
-        <Search className="h-4 w-4" />
+    <div className="relative w-full max-w-lg">
+      {/* Search Input */}
+      <div
+        className={cn(
+          "flex items-center gap-2 rounded-3xl bg-background/70 px-4 py-2 text-sm text-muted-foreground shadow-md backdrop-blur-md transition-all duration-300 focus-within:shadow-lg"
+        )}
+      >
+        <Search className="h-5 w-5 text-foreground/60" />
         <Input
           value={q}
           onFocus={() => setOpen(true)}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Buscar clases, tareas o notas…"
-          className="h-8 border-0 bg-transparent p-0 focus-visible:ring-0"
+          placeholder="Search everything…"
+          className="h-10 flex-1 border-0 bg-transparent p-0 text-foreground placeholder:text-muted-foreground focus-visible:ring-0"
         />
       </div>
 
-      {open && results && (
-        <Card className="absolute left-0 right-0 top-11 rounded-2xl border-0 shadow-lg backdrop-blur-md">
-          <div className="max-h-80 overflow-auto p-2">
-            {results.classes.length > 0 && (
-              <div className="px-2 py-1.5 text-xs text-muted-foreground">Clases</div>
-            )}
-            {results.classes.map((c) => (
-              <button key={c.id} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 hover:bg-accent/50" onClick={() => go("class", c.id)}>
-                <BookOpen className="h-4 w-4" />
-                <span className="truncate">{c.name}</span>
-              </button>
-            ))}
+      {/* Results Dropdown */}
+      <AnimatePresence>
+        {open && results && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+          >
+            <Card className="absolute left-0 right-0 top-14 rounded-2xl border border-border/40 bg-background/70 shadow-2xl backdrop-blur-lg overflow-hidden">
+              <div className="max-h-80 overflow-auto">
+                {/* Render Sections */}
+                {[
+                  { title: "Classes", items: results.classes, icon: BookOpen, type: "class" },
+                  { title: "Tasks", items: results.tasks, icon: CheckSquare, type: "task" },
+                  { title: "Notes", items: results.notes, icon: FileText, type: "note" },
+                  { title: "Contacts", items: results.contacts, icon: Users, type: "contact" },
+                ].map(({ title, items, icon: Icon, type }) =>
+                  items.length > 0 ? (
+                    <motion.div
+                      key={title}
+                      initial="hidden"
+                      animate="visible"
+                      exit="hidden"
+                      variants={sectionVariants}
+                      transition={{ staggerChildren: 0.05 }}
+                    >
+                      <div className="px-3 py-2 text-xs font-medium text-foreground/70">{title}</div>
+                      {items.map((item) => (
+                        <motion.button
+                          key={item.id}
+                          className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-foreground hover:bg-accent/50 transition-all duration-200"
+                          onClick={() => go(type, item.id)}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <Icon className="h-4 w-4 text-foreground/70" />
+                          <span className="truncate">{item.name || item.title}</span>
+                        </motion.button>
+                      ))}
+                    </motion.div>
+                  ) : null
+                )}
 
-            {results.tasks.length > 0 && (
-              <div className="px-2 py-1.5 text-xs text-muted-foreground">Tareas</div>
-            )}
-            {results.tasks.map((t) => (
-              <button key={t.id} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 hover:bg-accent/50" onClick={() => go("task")}>
-                <CheckSquare className="h-4 w-4" />
-                <span className="truncate">{t.title}</span>
-              </button>
-            ))}
+                {/* No results */}
+                {results.classes.length +
+                  results.tasks.length +
+                  results.notes.length +
+                  results.contacts.length === 0 && (
+                  <div className="px-3 py-4 text-sm text-muted-foreground text-center">
+                    No results found
+                  </div>
+                )}
+              </div>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-            {results.notes.length > 0 && (
-              <div className="px-2 py-1.5 text-xs text-muted-foreground">Notas</div>
-            )}
-            {results.notes.map((n) => (
-              <button key={n.id} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 hover:bg-accent/50" onClick={() => go("note", n.id)}>
-                <FileText className="h-4 w-4" />
-                <span className="truncate">{n.title}</span>
-              </button>
-            ))}
-
-            {results.contacts.length > 0 && (
-              <div className="px-2 py-1.5 text-xs text-muted-foreground">Contactos</div>
-            )}
-            {results.contacts.map((c) => (
-              <button key={c.id} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 hover:bg-accent/50" onClick={() => go("contact")}>
-                <Users className="h-4 w-4" />
-                <span className="truncate">{c.name}</span>
-              </button>
-            ))}
-
-            {results.classes.length + results.tasks.length + results.notes.length + results.contacts.length === 0 && (
-              <div className="px-3 py-4 text-sm text-muted-foreground">Sin resultados</div>
-            )}
-          </div>
-        </Card>
-      )}
-
-      {open && (
-        <div className="fixed inset-0 -z-10" onClick={() => setOpen(false)} />
-      )}
+      {/* Click outside to close */}
+      {open && <div className="fixed inset-0 -z-10" onClick={() => setOpen(false)} />}
     </div>
   );
 }

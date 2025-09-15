@@ -23,7 +23,9 @@ import {
   LogOut,
   Settings,
   User,
+  Sheet,
 } from "lucide-react";
+import { SheetContent, SheetTrigger } from "./ui/sheet";
 
 const navigationItems = [
   {

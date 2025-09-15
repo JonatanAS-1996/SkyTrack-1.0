@@ -5,7 +5,6 @@ import { Button } from "../components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "../components/ui/card";
@@ -55,14 +54,10 @@ import {
   Search,
   Filter,
   Eye,
-  BookOpen,
-  Calendar,
   Paperclip,
   MoreHorizontal,
 } from "lucide-react";
 import { format } from "date-fns";
-import { es } from "date-fns/locale";
-import { Note } from "../contexts/DataContext";
 
 export default function Notes() {
   const { classes, notes, addNote, updateNote, removeNote } = useData();
@@ -85,7 +80,6 @@ export default function Notes() {
           note.content.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesClass =
           selectedClass === "all" || note.classID === selectedClass;
-
         return matchesSearch && matchesClass;
       })
       .sort(
@@ -95,7 +89,7 @@ export default function Notes() {
   }, [notes, searchQuery, selectedClass]);
 
   const notesByClass = useMemo(() => {
-    const grouped: { [key: string]: Note[] } = {};
+    const grouped: { [key: string]: any[] } = {};
     classes.forEach((cls) => {
       grouped[cls.id] = filteredNotes.filter((note) => note.classID === cls.id);
     });
@@ -128,7 +122,7 @@ export default function Notes() {
     setShowAddDialog(false);
   };
 
-  const handleEdit = (note: Note) => {
+  const handleEdit = (note: any) => {
     setFormData({
       title: note.title,
       content: note.content,
@@ -139,17 +133,10 @@ export default function Notes() {
     setShowAddDialog(true);
   };
 
-  const handleDelete = (noteId: string) => {
-    removeNote(noteId);
-  };
+  const handleDelete = (noteId: string) => removeNote(noteId);
 
   const resetForm = () => {
-    setFormData({
-      title: "",
-      content: "",
-      classID: "none",
-      attachments: [],
-    });
+    setFormData({ title: "", content: "", classID: "none", attachments: [] });
     setEditingNote(null);
   };
 
@@ -158,18 +145,17 @@ export default function Notes() {
     return content.slice(0, maxLength) + "...";
   };
 
-  const NoteCard = ({ note }: { note: Note }) => {
+  const NoteCard = ({ note }: { note: any }) => {
     const classItem = classes.find((c) => c.id === note.classID);
-
     return (
-      <Card className="hover:shadow-md transition-shadow cursor-pointer group">
+      <Card className="hover:shadow-lg transition-shadow cursor-pointer group bg-white/50 dark:bg-zinc-900/50 backdrop-blur-md p-4 rounded-xl">
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
             <Link to={`/dashboard/notes/${note.id}`} className="flex-1 min-w-0">
               <CardTitle className="text-lg leading-tight group-hover:text-primary transition-colors">
                 {note.title}
               </CardTitle>
-              <div className="flex items-center gap-2 mt-2">
+              <div className="flex items-center gap-2 mt-2 flex-wrap">
                 {classItem && (
                   <Badge variant="secondary" className="text-xs">
                     <div
@@ -180,7 +166,7 @@ export default function Notes() {
                   </Badge>
                 )}
                 <span className="text-xs text-muted-foreground">
-                  {format(note.createdAt, "MMM d, yyyy", { locale: es })}
+                  {format(note.createdAt, "MMM d, yyyy")}
                 </span>
                 {note.attachments.length > 0 && (
                   <Badge variant="outline" className="text-xs">
@@ -192,7 +178,7 @@ export default function Notes() {
             </Link>
             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
               <Link to={`/dashboard/notes/${note.id}`}>
-                <Button variant="ghost" size="sm" title="Ver detalle">
+                <Button variant="ghost" size="sm" title="View Details">
                   <Eye className="h-4 w-4" />
                 </Button>
               </Link>
@@ -218,16 +204,15 @@ export default function Notes() {
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Eliminar Nota</AlertDialogTitle>
+                    <AlertDialogTitle>Delete Note</AlertDialogTitle>
                     <AlertDialogDescription>
-                      ¿Estás seguro de que quieres eliminar "{note.title}"? Esta
-                      acción no se puede deshacer.
+                      Are you sure you want to delete "{note.title}"? This action cannot be undone.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction onClick={() => handleDelete(note.id)}>
-                      Eliminar
+                      Delete
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
@@ -248,13 +233,16 @@ export default function Notes() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Notas</h1>
+          <h1 className="text-3xl font-bold text-foreground">Notes</h1>
           <p className="text-muted-foreground">
-            Crea y organiza tus notas de estudio.
+            Create and organize your study notes.
           </p>
         </div>
+
+        {/* Add/Edit Note Modal */}
         <Dialog
           open={showAddDialog}
           onOpenChange={(open) => {
@@ -265,27 +253,25 @@ export default function Notes() {
           <DialogTrigger asChild>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              Nueva Nota
+              New Note
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
             <form onSubmit={handleSubmit}>
               <DialogHeader>
-                <DialogTitle>
-                  {editingNote ? "Editar Nota" : "Nueva Nota"}
-                </DialogTitle>
+                <DialogTitle>{editingNote ? "Edit Note" : "New Note"}</DialogTitle>
                 <DialogDescription>
                   {editingNote
-                    ? "Actualiza el contenido de tu nota."
-                    : "Crea una nueva nota para tus estudios."}
+                    ? "Update your note content."
+                    : "Create a new note for your studies."}
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Título</Label>
+                  <Label htmlFor="title">Title</Label>
                   <Input
                     id="title"
-                    placeholder="ej. Apuntes de Matemáticas - Capítulo 5"
+                    placeholder="e.g. Math Notes - Chapter 5"
                     value={formData.title}
                     onChange={(e) =>
                       setFormData({ ...formData, title: e.target.value })
@@ -294,7 +280,7 @@ export default function Notes() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="class">Clase (Opcional)</Label>
+                  <Label htmlFor="class">Class (Optional)</Label>
                   <Select
                     value={formData.classID}
                     onValueChange={(value) =>
@@ -302,10 +288,10 @@ export default function Notes() {
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar clase" />
+                      <SelectValue placeholder="Select a class" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">Sin clase asociada</SelectItem>
+                      <SelectItem value="none">No class</SelectItem>
                       {classes.map((classItem) => (
                         <SelectItem key={classItem.id} value={classItem.id}>
                           <div className="flex items-center gap-2">
@@ -321,10 +307,10 @@ export default function Notes() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="content">Contenido</Label>
+                  <Label htmlFor="content">Content</Label>
                   <Textarea
                     id="content"
-                    placeholder="Escribe el contenido de tu nota aquí..."
+                    placeholder="Write your note here..."
                     value={formData.content}
                     onChange={(e) =>
                       setFormData({ ...formData, content: e.target.value })
@@ -341,10 +327,10 @@ export default function Notes() {
                   variant="outline"
                   onClick={() => setShowAddDialog(false)}
                 >
-                  Cancelar
+                  Cancel
                 </Button>
                 <Button type="submit">
-                  {editingNote ? "Actualizar Nota" : "Guardar Nota"}
+                  {editingNote ? "Update Note" : "Save Note"}
                 </Button>
               </DialogFooter>
             </form>
@@ -353,22 +339,22 @@ export default function Notes() {
       </div>
 
       {/* Filters */}
-      <Card>
+      <Card className="bg-white/50 dark:bg-zinc-900/50 backdrop-blur-md p-4 rounded-xl shadow-lg">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
             <Filter className="h-5 w-5" />
-            Filtros
+            Filters
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="search">Buscar</Label>
+              <Label htmlFor="search">Search</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="search"
-                  placeholder="Buscar notas..."
+                  placeholder="Search notes..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -376,13 +362,13 @@ export default function Notes() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="classFilter">Clase</Label>
+              <Label htmlFor="classFilter">Class</Label>
               <Select value={selectedClass} onValueChange={setSelectedClass}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todas las Notas</SelectItem>
+                  <SelectItem value="all">All Notes</SelectItem>
                   {classes.map((classItem) => (
                     <SelectItem key={classItem.id} value={classItem.id}>
                       <div className="flex items-center gap-2">
@@ -401,31 +387,32 @@ export default function Notes() {
         </CardContent>
       </Card>
 
+      {/* Notes Grid */}
       {notes.length === 0 ? (
         <div className="text-center py-12">
           <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-          <h3 className="text-lg font-medium mb-2">No hay notas</h3>
+          <h3 className="text-lg font-medium mb-2">No Notes</h3>
           <p className="text-muted-foreground mb-4">
-            Crea tu primera nota para comenzar a organizar tus estudios.
+            Create your first note to start organizing your studies.
           </p>
           <Button onClick={() => setShowAddDialog(true)}>
             <Plus className="mr-2 h-4 w-4" />
-            Crear Primera Nota
+            Create First Note
           </Button>
         </div>
       ) : filteredNotes.length === 0 ? (
         <div className="text-center py-12">
           <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-          <h3 className="text-lg font-medium mb-2">No se encontraron notas</h3>
+          <h3 className="text-lg font-medium mb-2">No Notes Found</h3>
           <p className="text-muted-foreground mb-4">
-            Intenta ajustar tus filtros o términos de búsqueda.
+            Try adjusting your filters or search terms.
           </p>
         </div>
       ) : (
         <Tabs defaultValue="all" className="space-y-6">
           <TabsList className="grid w-full grid-cols-1 md:grid-cols-4 lg:grid-cols-6">
             <TabsTrigger value="all" className="flex items-center gap-2">
-              Todas
+              All
               <Badge variant="secondary" className="text-xs">
                 {filteredNotes.length}
               </Badge>
@@ -449,7 +436,7 @@ export default function Notes() {
             {classes.length > 4 && (
               <TabsTrigger value="more" className="flex items-center gap-2">
                 <MoreHorizontal className="h-4 w-4" />
-                Más
+                More
               </TabsTrigger>
             )}
           </TabsList>
@@ -477,7 +464,7 @@ export default function Notes() {
                 <div className="text-center py-8">
                   <FileText className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                   <p className="text-muted-foreground">
-                    No hay notas para {classItem.name}
+                    No notes for {classItem.name}
                   </p>
                 </div>
               )}

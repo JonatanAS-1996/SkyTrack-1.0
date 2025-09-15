@@ -51,8 +51,8 @@ const colorOptions = [
   { name: "Orange", value: "#f59e0b", bg: "bg-amber-500" },
   { name: "Red", value: "#ef4444", bg: "bg-red-500" },
   { name: "Pink", value: "#ec4899", bg: "bg-pink-500" },
-  { name: "Indigo", value: "#6366f1", bg: "bg-indigo-500" },
   { name: "Teal", value: "#14b8a6", bg: "bg-teal-500" },
+  { name: "Indigo", value: "#6366f1", bg: "bg-indigo-500" },
 ];
 
 export default function Classes() {
@@ -87,7 +87,10 @@ export default function Classes() {
   };
 
   const handleDelete = (classId: string) => {
+    // Elimina la clase del estado
     removeClass(classId);
+    // Si estabas editando esa clase, resetea el formulario
+    if (editingClass === classId) resetForm();
   };
 
   const getClassStats = (classId: string) => {
@@ -169,11 +172,10 @@ export default function Classes() {
                         onClick={() =>
                           setFormData({ ...formData, color: color.value })
                         }
-                        className={`h-8 w-8 rounded-full border-2 transition-transform hover:scale-110 ${
-                          formData.color === color.value
+                        className={`h-8 w-8 rounded-full border-2 transition-transform hover:scale-110 ${formData.color === color.value
                             ? "border-foreground ring-2 ring-ring"
                             : "border-border"
-                        } ${color.bg}`}
+                          } ${color.bg}`}
                         title={color.name}
                       />
                     ))}
@@ -272,13 +274,13 @@ export default function Classes() {
                               {(stats.totalTasks > 0 ||
                                 stats.totalNotes > 0 ||
                                 stats.totalEvents > 0) && (
-                                <span className="block mt-2 text-destructive">
-                                  Warning: This will also remove{" "}
-                                  {stats.totalTasks} tasks, {stats.totalNotes} notes
-                                  {stats.totalEvents > 0 && `, and ${stats.totalEvents} events`} associated with this
-                                  class.
-                                </span>
-                              )}
+                                  <span className="block mt-2 text-destructive">
+                                    Warning: This will also remove{" "}
+                                    {stats.totalTasks} tasks, {stats.totalNotes} notes
+                                    {stats.totalEvents > 0 && `, and ${stats.totalEvents} events`} associated with this
+                                    class.
+                                  </span>
+                                )}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>

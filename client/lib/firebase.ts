@@ -1,37 +1,32 @@
-import { initializeApp, getApps } from "firebase/app";
-import {
-  getAuth,
-  GoogleAuthProvider,
-  setPersistence,
-  browserLocalPersistence,
-} from "firebase/auth";
+import { initializeApp } from "firebase/app";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-export const firebaseReady = Boolean(
-  firebaseConfig.apiKey &&
-    firebaseConfig.authDomain &&
-    firebaseConfig.projectId &&
-    firebaseConfig.appId,
-);
+let app;
+let auth;
+let db;
+let googleProvider;
+let firebaseReady = false;
 
-let app: ReturnType<typeof initializeApp> | undefined;
-let _auth: ReturnType<typeof getAuth> | null = null;
-let _db: ReturnType<typeof getFirestore> | null = null;
-
-if (firebaseReady) {
-  app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
-  _auth = getAuth(app);
-  _db = getFirestore(app);
-  setPersistence(_auth, browserLocalPersistence).catch(() => {});
+try {
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getFirestore(app);
+  googleProvider = new GoogleAuthProvider();
+  firebaseReady = true;
+} catch (err) {
+  console.error("Firebase init error:", err);
 }
 
-export const auth = _auth;
-export const db = _db;
-export const googleProvider = new GoogleAuthProvider();
+export { auth, db, googleProvider, firebaseReady };
