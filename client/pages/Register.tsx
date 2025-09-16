@@ -38,7 +38,7 @@ export default function Register() {
   const { register, registerWithGoogle, loading } = useAuth();
   const navigate = useNavigate();
 
-  // Normal signup
+  // Registro normal
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -62,12 +62,11 @@ export default function Register() {
       await register(email, password, name, role);
       navigate("/dashboard");
     } catch (err: any) {
-      console.error("Registration error:", err);
       setError(err.message || "Registration failed. Please try again.");
     }
   };
 
-  // Google signup
+  // Registro con Google
   const handleGoogleSignup = async () => {
     setError("");
 
@@ -77,10 +76,9 @@ export default function Register() {
     }
 
     try {
-      await registerWithGoogle(role); // 👈 pasamos el rol elegido
+      await registerWithGoogle(role); // Pasamos el rol elegido
       navigate("/dashboard");
     } catch (err: any) {
-      console.error("Google signup error:", err);
       setError(err.message || "Google signup failed. Please try again.");
     }
   };
@@ -114,10 +112,7 @@ export default function Register() {
           </CardHeader>
           <CardContent className="space-y-6">
             {error && (
-              <motion.div
-                initial={{ y: -20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-              >
+              <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
                 <Alert variant="destructive" className="rounded-xl">
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
@@ -125,7 +120,7 @@ export default function Register() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Full Name */}
+              {/* Nombre */}
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
                 <div className="relative">
@@ -159,12 +154,15 @@ export default function Register() {
                 </div>
               </div>
 
-              {/* Role */}
+              {/* Rol */}
               <div className="space-y-2">
                 <Label htmlFor="role">Role</Label>
                 <div className="relative">
                   <GraduationCap className="absolute left-3 top-3 h-5 w-5 text-zinc-400 z-10 pointer-events-none" />
-                  <Select value={role} onValueChange={(value) => setRole(value as User["role"])}>
+                  <Select
+                    value={role}
+                    onValueChange={(value) => setRole(value as User["role"])}
+                  >
                     <SelectTrigger className="pl-11 rounded-2xl bg-white/60 dark:bg-zinc-800/50 backdrop-blur-md border border-zinc-200/50 dark:border-zinc-700/40">
                       <SelectValue placeholder="Select your role" />
                     </SelectTrigger>
@@ -211,7 +209,7 @@ export default function Register() {
                 </div>
               </div>
 
-              {/* Email/Password Signup */}
+              {/* Botón registro */}
               <Button
                 type="submit"
                 className="w-full rounded-full py-6 text-base font-medium shadow-md transition-all hover:shadow-lg hover:scale-[1.02] bg-gradient-to-r from-sky-500 to-indigo-500 text-white"

@@ -8,13 +8,13 @@ import {
   updateProfile as fbUpdateProfile,
   signOut,
 } from "firebase/auth";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 
 export interface User {
   uid: string;
   name: string;
   email: string;
-  photoURL?: string;
+  photoURL: string | null;
   role: "student" | "teacher" | "tutor";
 }
 
@@ -27,10 +27,9 @@ interface AuthContextType {
     name: string,
     role: User["role"]
   ) => Promise<void>;
-  loginWithGoogle: () => Promise<void>;
-  updateProfile: (
-    updates: Partial<Pick<User, "name" | "photoURL">>
-  ) => Promise<void>;
+  loginWithGoogle: () => Promise<void>; // ✅ added
+  registerWithGoogle: (role: User["role"]) => Promise<void>;
+  updateProfile: (updates: Partial<Pick<User, "name" | "photoURL">>) => Promise<void>;
   logout: () => void;
   loading: boolean;
 }
@@ -43,26 +42,30 @@ export function useAuth() {
   return ctx;
 }
 
+// Ensure user document exists in Firestore
 async function ensureUserDoc(u: {
   uid: string;
   displayName: string | null;
   email: string;
   photoURL: string | null;
+  role?: User["role"];
 }) {
   if (!firebaseReady || !db) throw new Error("Firestore not ready");
   const ref = doc(db, "users", u.uid);
   const snap = await getDoc(ref);
+
   if (!snap.exists()) {
     const userDoc: User = {
       uid: u.uid,
       name: u.displayName || u.email.split("@")[0],
       email: u.email,
-      photoURL: u.photoURL || undefined,
-      role: "student",
+      photoURL: u.photoURL || null,
+      role: u.role || "student",
     };
-    await setDoc(ref, userDoc);
+    await setDoc(ref, { ...userDoc, createdAt: serverTimestamp() });
     return userDoc;
   }
+
   return snap.data() as User;
 }
 
@@ -83,7 +86,7 @@ function FirebaseAuthProvider({ children }: { children: React.ReactNode }) {
             uid: fbUser.uid,
             displayName: fbUser.displayName,
             email: fbUser.email!,
-            photoURL: fbUser.photoURL,
+            photoURL: fbUser.photoURL || null,
           });
           setUser(docUser);
         } else {
@@ -116,51 +119,88 @@ function FirebaseAuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     try {
       if (!firebaseReady || !auth || !db) throw new Error("Firebase not ready");
+
       const cred = await createUserWithEmailAndPassword(auth, email, password);
+
       if (auth.currentUser) {
         await fbUpdateProfile(auth.currentUser, { displayName: name });
       }
+
       const newUser: User = {
         uid: cred.user.uid,
         name,
         email,
         role,
-        photoURL: auth.currentUser?.photoURL || undefined,
+        photoURL: auth.currentUser?.photoURL || null,
       };
-      await setDoc(doc(db, "users", cred.user.uid), newUser);
+
+      await setDoc(doc(db, "users", cred.user.uid), {
+        ...newUser,
+        createdAt: serverTimestamp(),
+      });
+
       setUser(newUser);
     } finally {
       setLoading(false);
     }
   };
 
+  // Login with Google (keeps role from Firestore, doesn’t overwrite)
   const loginWithGoogle = async () => {
     setLoading(true);
     try {
-      if (!firebaseReady || !auth) throw new Error("Firebase not ready");
+      if (!firebaseReady || !auth || !db) throw new Error("Firebase not ready");
+
       const res = await signInWithPopup(auth, googleProvider);
+
       const docUser = await ensureUserDoc({
         uid: res.user.uid,
         displayName: res.user.displayName,
         email: res.user.email!,
-        photoURL: res.user.photoURL,
+        photoURL: res.user.photoURL || null,
       });
+
       setUser(docUser);
     } finally {
       setLoading(false);
     }
   };
 
-  const updateProfile = async (
-    updates: Partial<Pick<User, "name" | "photoURL">>
-  ) => {
+  // Register with Google (forces choosing a role)
+  const registerWithGoogle = async (role: User["role"]) => {
+    setLoading(true);
+    try {
+      if (!firebaseReady || !auth || !db) throw new Error("Firebase not ready");
+
+      const res = await signInWithPopup(auth, googleProvider);
+
+      const docUser = await ensureUserDoc({
+        uid: res.user.uid,
+        displayName: res.user.displayName,
+        email: res.user.email!,
+        photoURL: res.user.photoURL || null,
+        role,
+      });
+
+      setUser(docUser);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateProfile = async (updates: Partial<Pick<User, "name" | "photoURL">>) => {
     if (!user) return;
     if (!firebaseReady || !auth || !db) throw new Error("Firebase not ready");
 
     if (auth.currentUser && updates.name) {
       await fbUpdateProfile(auth.currentUser, { displayName: updates.name });
     }
-    await updateDoc(doc(db, "users", user.uid), updates as any);
+
+    await updateDoc(doc(db, "users", user.uid), {
+      ...updates,
+      photoURL: updates.photoURL ?? null,
+    });
+
     setUser({ ...user, ...updates });
   };
 
@@ -173,7 +213,8 @@ function FirebaseAuthProvider({ children }: { children: React.ReactNode }) {
     user,
     login,
     register,
-    loginWithGoogle,
+    loginWithGoogle, 
+    registerWithGoogle,
     updateProfile,
     logout,
     loading,

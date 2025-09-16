@@ -62,31 +62,35 @@ export default function Profile() {
 
   return (
     <div className="space-y-6">
+      {/* Back Button */}
       <div className="flex items-center gap-4">
         <Button variant="outline" size="sm" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Volver
+          Back
         </Button>
       </div>
 
+      {/* Page Title */}
       <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Perfil</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">Profile</h1>
         <p className="text-muted-foreground">
-          Gestiona tu información personal y avatar.
+          Manage your personal information and avatar.
         </p>
       </div>
 
+      {/* Profile Card */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <UserIcon className="h-5 w-5" />
-            Información Personal
+            Personal Information
           </CardTitle>
           <CardDescription>
-            Actualiza tu nombre y foto de perfil.
+            Update your name and profile picture.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Avatar Upload */}
           <div className="flex items-center gap-4">
             <Avatar className="h-20 w-20">
               <AvatarImage src={photoURL} alt={user.name} />
@@ -104,14 +108,15 @@ export default function Profile() {
               />
               <Button variant="outline" size="sm" onClick={handleUploadClick}>
                 <Upload className="h-4 w-4 mr-2" />
-                Subir nueva foto
+                Upload New Photo
               </Button>
             </div>
           </div>
 
+          {/* Name & Email */}
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="name">Nombre</Label>
+              <Label htmlFor="name">Name</Label>
               <div className="relative">
                 <UserIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -136,10 +141,11 @@ export default function Profile() {
             </div>
           </div>
 
+          {/* Save Button */}
           <div className="pt-2">
             <Button onClick={handleSave}>
               <Save className="h-4 w-4 mr-2" />
-              Guardar
+              Save
             </Button>
           </div>
         </CardContent>

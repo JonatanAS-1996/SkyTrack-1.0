@@ -11,7 +11,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { DataProvider } from "./contexts/DataContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import { LanguageProvider } from "./contexts/LanguageContext";
 
 // Components
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -37,7 +36,6 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <ThemeProvider>
-        <LanguageProvider>
           <AuthProvider>
             <DataProvider>
             <Toaster />
@@ -82,7 +80,6 @@ const App = () => (
             </BrowserRouter>
           </DataProvider>
         </AuthProvider>
-      </LanguageProvider>
       </ThemeProvider>
     </TooltipProvider>
   </QueryClientProvider>
