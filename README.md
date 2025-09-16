@@ -1,4 +1,4 @@
-#✨SkyTrack
+##✨SkyTrack
 
 **SkyTrack** is much more than a simple organization app: it's your **personal digital space** to keep everything important under control.
 From your classes and assignments to your events, goals, and personal notes, this tool is designed to help you live with more **clarity, balance, and productivity**, without ever losing sight of what really matters.
